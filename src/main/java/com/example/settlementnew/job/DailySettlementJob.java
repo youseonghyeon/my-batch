@@ -5,9 +5,15 @@ import com.example.settlementnew.api.MessageApi;
 import com.example.settlementnew.entity.DailySettlement;
 import com.example.settlementnew.entity.TransferHistory;
 import com.example.settlementnew.entity.TransferStatus;
+import com.example.settlementnew.processor.ReTransferProcessor;
+import com.example.settlementnew.processor.TransferProcessor;
+import com.example.settlementnew.reader.SettlementReader;
 import com.example.settlementnew.repository.TransferHistoryRepository;
 import com.example.settlementnew.service.SettlementService;
 import com.example.settlementnew.service.TransferService;
+import com.example.settlementnew.step.MessageStep;
+import com.example.settlementnew.step.MockDataInsertStep;
+import com.example.settlementnew.step.SettlementStep;
 import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,9 +34,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
@@ -38,50 +41,26 @@ public class DailySettlementJob {
 
     private final JobRepository jobRepository;
     private final PlatformTransactionManager ptm;
-    private final SettlementService settlementService;
-    private final TransferService transferService;
     private final EntityManagerFactory emf;
-    private final TransferHistoryRepository transferHistoryRepository;
-    private final MessageApi messageApi;
 
+
+    private final TransferHistoryRepository transferHistoryRepository;
+    private final MessageStep messageStep;
+    private final SettlementStep settlementStep;
+    private final MockDataInsertStep mockDataInsertStep;
+    private final TransferProcessor transferProcessor;
+    private final ReTransferProcessor reTransferProcessor;
 
 
     @Bean(name = "dailyJob")
     public Job dailyJob() {
         return new JobBuilder("dailyJob", jobRepository)
-                .start(insertMockSettlementStep(null))
-                .next(dailySettlementStep(null))
-                .next(transferSettlementStep(null))
-                .next(printResultStep())
-                .next(reTransferSettlementStep(null))
-                .next(printResultStep())
+                .start(mockDataInsertStep.insertMockSettlementStep(null)) // mock 데이터 삽입
+                .next(settlementStep.dailySettlementStep(null)) // 일일 정산
+                .next(transferSettlementStep(null)) // 정산 이체
+                .next(reTransferSettlementStep(null)) // 정산 이체 실패시 재이체
+                .next(messageStep.sendMessageStep(null)) // 정산 이체 결과 메시지 전송
                 .build();
-    }
-
-
-    @Bean(name = "insertMockSettlementStep")
-    @JobScope
-    public Step insertMockSettlementStep(@Value("#{jobParameters[mockSize]}") Integer mockSize) {
-        return new StepBuilder("insertMockSettlementStep", jobRepository)
-                .tasklet((contribution, chunkContext) -> {
-                    log.info("==================== 1단계 Mock 데이터 삽입 시작 ====================");
-                    settlementService.insertMockData(mockSize);
-                    return RepeatStatus.FINISHED;
-                }, ptm)
-                .build();
-    }
-
-    @Bean(name = "dailySettlementStep")
-    @JobScope
-    public Step dailySettlementStep(@Value("#{jobParameters[targetDate]}") String targetDate) {
-        return new StepBuilder("dailySettlementStep", jobRepository)
-                .tasklet((contribution, chunkContext) -> {
-                    log.info("==================== 2단계 데이터 정산 시작 ====================");
-                    LocalDate target = LocalDate.parse(targetDate, DateTimeFormatter.ISO_DATE);
-                    log.info("현재 날짜 : {}, 정산 날짜 : {}", LocalDate.now().format(DateTimeFormatter.ISO_DATE), targetDate);
-                    settlementService.jdbcDailySettlement(target);
-                    return RepeatStatus.FINISHED;
-                }, ptm).build();
     }
 
 
@@ -91,35 +70,13 @@ public class DailySettlementJob {
         log.info("==================== 3단계 송금 시작 ====================");
         return new StepBuilder("transferSettlementStep", jobRepository)
                 .<DailySettlement, TransferHistory>chunk(chunkSize, ptm)
-                .reader(settlementReader(null))
-                .processor(transferProcessor())
+                .reader(new SettlementReader(emf))
+                .processor(transferProcessor)
                 .writer(settlementWriter())
                 .build();
 
     }
 
-    @Bean
-    @StepScope
-    public JpaPagingItemReader<DailySettlement> settlementReader(@Value("#{jobParameters[chunkSize]}") Integer chunkSize) {
-        JpaPagingItemReader<DailySettlement> reader = new JpaPagingItemReader<>();
-        reader.setEntityManagerFactory(emf);
-        reader.setQueryString("select ds from DailySettlement ds");
-        reader.setPageSize(chunkSize);
-        return reader;
-    }
-
-    @Bean
-    public ItemProcessor<DailySettlement, TransferHistory> transferProcessor() {
-        return dailySettlement -> {
-            History history = transferService.transfer(dailySettlement.getUsername(), dailySettlement.getTotalPrice());
-            TransferStatus transferStatus = history.isStatus() ? TransferStatus.COMPLETED : TransferStatus.FAILED;
-
-            if (transferStatus == TransferStatus.COMPLETED) {
-                messageApi.send(dailySettlement.getUsername(), "송금이 완료되었습니다.");
-            }
-            return new TransferHistory(transferStatus, history.getFrom(), history.getTo(), history.getAmount());
-        };
-    }
 
     @Bean
     public JpaItemWriter<TransferHistory> settlementWriter() {
@@ -145,7 +102,7 @@ public class DailySettlementJob {
         return new StepBuilder("reTransferSettlementStep", jobRepository)
                 .<TransferHistory, TransferHistory>chunk(chunkSize, ptm)
                 .reader(reSettlementReader(null))
-                .processor(reTransferProcessor())
+                .processor(reTransferProcessor)
                 .writer(reSettlementWriter())
                 .build();
 
@@ -159,25 +116,6 @@ public class DailySettlementJob {
         reader.setQueryString("select th from TransferHistory th where th.status = 'FAILED'");
         reader.setPageSize(chunkSize);
         return reader;
-    }
-
-    @Bean
-    @Transactional
-    public ItemProcessor<TransferHistory, TransferHistory> reTransferProcessor() {
-        return transferHistory -> {
-
-            // 재송금 한 로그는 REATTEMPT 상태로 변경
-            Long id = transferHistory.getId();
-            TransferHistory his = transferHistoryRepository.findById(id).orElseThrow(IllegalArgumentException::new);
-            his.setStatus(TransferStatus.REATTEMPT);
-
-            History history = transferService.transfer(transferHistory.getToUsername(), transferHistory.getAmount());
-            TransferStatus transferStatus = history.isStatus() ? TransferStatus.COMPLETED : TransferStatus.FAILED;
-            if (transferStatus == TransferStatus.COMPLETED) {
-                messageApi.send(transferHistory.getToUsername(), "송금이 완료되었습니다.");
-            }
-            return new TransferHistory(transferStatus, history.getFrom(), history.getTo(), history.getAmount());
-        };
     }
 
     @Bean

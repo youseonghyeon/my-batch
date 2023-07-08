@@ -1,5 +1,6 @@
 package com.example.settlementnew.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,6 +23,7 @@ public class DailySettlement {
 
     private int totalPrice;
 
+//    @JsonIgnore
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "dailySettlement", fetch = FetchType.LAZY)
