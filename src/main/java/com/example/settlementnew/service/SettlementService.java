@@ -1,9 +1,7 @@
 package com.example.settlementnew.service;
 
 import com.example.settlementnew.entity.Settlement;
-import com.example.settlementnew.repository.DailySettlementRepository;
 import com.example.settlementnew.repository.SettlementRepository;
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -15,7 +13,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Slf4j
 @Service

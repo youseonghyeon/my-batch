@@ -21,10 +21,9 @@ public class TransferProcessor implements ItemProcessor<DailySettlement, Transfe
         History history = transferService.transfer(dailySettlement.getUsername(), dailySettlement.getTotalPrice());
         TransferStatus transferStatus = history.isStatus() ? TransferStatus.COMPLETED : TransferStatus.FAILED;
 
-        if (transferStatus == TransferStatus.COMPLETED) {
-
-            messageBroker.sendMessage(dailySettlement.getUsername() + "송금이 완료되었습니다.");
-        }
-        return new TransferHistory(transferStatus, history.getFrom(), history.getTo(), history.getAmount());
+//        if (transferStatus == TransferStatus.COMPLETED) {
+//            messageBroker.sendMessage(dailySettlement.getUsername() + "송금이 완료되었습니다.");
+//        }
+        return new TransferHistory(transferStatus, history.getFrom(), history.getTo(), history.getAmount(), dailySettlement);
     }
 }

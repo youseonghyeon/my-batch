@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
+@ToString(exclude = "transferHistory")
 @NoArgsConstructor
 public class DailySettlement {
 
@@ -23,7 +25,6 @@ public class DailySettlement {
 
     private int totalPrice;
 
-//    @JsonIgnore
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "dailySettlement", fetch = FetchType.LAZY)

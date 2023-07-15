@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class ReTransferProcessor implements ItemProcessor<TransferHistory, TransferHistory> {
+public class RetryTransferProcessor implements ItemProcessor<TransferHistory, TransferHistory> {
 
     private final TransferHistoryRepository transferHistoryRepository;
     private final TransferService transferService;
@@ -27,9 +27,6 @@ public class ReTransferProcessor implements ItemProcessor<TransferHistory, Trans
 
         History history = transferService.transfer(transferHistory.getToUsername(), transferHistory.getAmount());
         TransferStatus transferStatus = history.isStatus() ? TransferStatus.COMPLETED : TransferStatus.FAILED;
-        if (transferStatus == TransferStatus.COMPLETED) {
-            messageBroker.sendMessage(transferHistory.getToUsername() + "송금이 완료되었습니다.");
-        }
-        return new TransferHistory(transferStatus, history.getFrom(), history.getTo(), history.getAmount());
+        return new TransferHistory(transferStatus, history.getFrom(), history.getTo(), history.getAmount(), transferHistory.getDailySettlement());
     }
 }

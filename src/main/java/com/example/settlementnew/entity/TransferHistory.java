@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Setter
-@ToString
+@ToString(exclude = "dailySettlement")
 @NoArgsConstructor
 public class TransferHistory {
 
@@ -40,5 +40,14 @@ public class TransferHistory {
         this.toUsername = toUsername;
         this.amount = amount;
         this.createdAt = LocalDateTime.now();
+    }
+
+    public TransferHistory(TransferStatus status, String fromUsername, String toUsername, int amount, DailySettlement dailySettlement) {
+        this.status = status;
+        this.fromUsername = fromUsername;
+        this.toUsername = toUsername;
+        this.amount = amount;
+        this.createdAt = LocalDateTime.now();
+        this.dailySettlement = dailySettlement;
     }
 }

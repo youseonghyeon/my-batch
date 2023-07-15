@@ -1,5 +1,6 @@
 package com.example.settlementnew.service;
 
+import com.example.settlementnew.api.dto.MessageMetadata;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +14,7 @@ public class MessageBroker {
     private final RabbitTemplate rabbitTemplate;
     private final ObjectMapper objectMapper;
 
-    public void sendMessage(Object message) {
+    public void sendMessage(Object message, MessageMetadata metadata) {
         try {
             rabbitTemplate.convertAndSend("message-handler", "#", objectMapper.writeValueAsString(message));
         } catch (JsonProcessingException e) {

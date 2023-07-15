@@ -11,8 +11,8 @@ import java.util.Map;
 @Component
 public class BankApi {
 
-    private final double ERROR_RATE = 0.03;
-    private final double CRITICAL_ERROR_RATE = 0.005;
+    private final double ERROR_RATE = 0.1;
+    private final double CRITICAL_ERROR_RATE = 0.02;
 
     Map<String, String> map = new HashMap<>();
 

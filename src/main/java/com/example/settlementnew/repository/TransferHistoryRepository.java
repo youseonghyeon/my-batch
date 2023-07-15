@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface TransferHistoryRepository extends JpaRepository<TransferHistory, Long> {
     List<TransferHistory> findAllByStatus(TransferStatus status);
+
 }

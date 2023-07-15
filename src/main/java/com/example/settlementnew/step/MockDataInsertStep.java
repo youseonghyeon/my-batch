@@ -1,10 +1,6 @@
 package com.example.settlementnew.step;
 
-import com.example.settlementnew.api.MessageApi;
-import com.example.settlementnew.repository.TransferHistoryRepository;
 import com.example.settlementnew.service.SettlementService;
-import com.example.settlementnew.service.TransferService;
-import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Step;
@@ -25,12 +21,6 @@ public class MockDataInsertStep {
     private final JobRepository jobRepository;
     private final PlatformTransactionManager ptm;
     private final SettlementService settlementService;
-    private final TransferService transferService;
-    private final EntityManagerFactory emf;
-    private final TransferHistoryRepository transferHistoryRepository;
-    private final MessageApi messageApi;
-    private final MessageStep messageStep;
-    private final SettlementStep settlementStep;
 
     @Bean(name = "insertMockSettlementStep")
     @JobScope
