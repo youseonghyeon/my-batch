@@ -4,7 +4,7 @@ import com.example.settlementnew.api.History;
 import com.example.settlementnew.entity.TransferHistory;
 import com.example.settlementnew.entity.TransferStatus;
 import com.example.settlementnew.repository.TransferHistoryRepository;
-import com.example.settlementnew.service.MessageBroker;
+import com.example.settlementnew.api.MessageBroker;
 import com.example.settlementnew.service.TransferService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.item.ItemProcessor;

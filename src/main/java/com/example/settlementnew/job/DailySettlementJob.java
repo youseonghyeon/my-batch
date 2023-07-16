@@ -58,6 +58,7 @@ public class DailySettlementJob {
      * 3. 정산 이체
      * 4. 정산 이체 실패시 재이체
      * 5. 정산 이체 결과 메시지 전송
+     * 6. 정산 이체 결과 검증
      *
      * @JobParameter : mockSize, targetDate, chunkSize
      */

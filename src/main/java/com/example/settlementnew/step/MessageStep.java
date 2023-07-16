@@ -1,12 +1,10 @@
 package com.example.settlementnew.step;
 
 import com.example.settlementnew.api.dto.DefaultMessageMetadata;
-import com.example.settlementnew.api.dto.MessageMetadata;
 import com.example.settlementnew.entity.DailySettlement;
 import com.example.settlementnew.entity.TransferHistory;
 import com.example.settlementnew.entity.TransferStatus;
-import com.example.settlementnew.repository.TransferHistoryRepository;
-import com.example.settlementnew.service.MessageBroker;
+import com.example.settlementnew.api.MessageBroker;
 import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +31,6 @@ public class MessageStep {
     private final PlatformTransactionManager ptm;
     private final EntityManagerFactory emf;
     private final MessageBroker messageBroker;
-    private final TransferHistoryRepository transferHistoryRepository;
 
     private static final String SELECT_TRANSFER_HISTORY =
             "SELECT th FROM TransferHistory th " +

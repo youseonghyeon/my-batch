@@ -1,4 +1,4 @@
-package com.example.settlementnew.service;
+package com.example.settlementnew.api;
 
 import com.example.settlementnew.api.dto.MessageMetadata;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -14,6 +14,7 @@ public class MessageBroker {
     private final RabbitTemplate rabbitTemplate;
     private final ObjectMapper objectMapper;
 
+
     public void sendMessage(Object message, MessageMetadata metadata) {
         try {
             rabbitTemplate.convertAndSend("message-handler", "#", objectMapper.writeValueAsString(message));
@@ -21,4 +22,6 @@ public class MessageBroker {
             throw new RuntimeException(e);
         }
     }
+
+
 }

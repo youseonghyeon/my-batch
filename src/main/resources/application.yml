@@ -5,3 +5,5 @@ spring.rabbitmq:
   port: 5672
   username: admin
   password: admin
+server:
+  port: 8002

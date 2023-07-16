@@ -3,7 +3,6 @@ package com.example.settlementnew.step;
 import com.example.settlementnew.entity.DailySettlement;
 import com.example.settlementnew.entity.TransferHistory;
 import com.example.settlementnew.entity.TransferStatus;
-import com.example.settlementnew.repository.DailySettlementRepository;
 import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +25,6 @@ public class TransferValidationStep {
 
     private final JobRepository jobRepository;
     private final PlatformTransactionManager ptm;
-    private final DailySettlementRepository dailySettlementRepository;
     private final EntityManagerFactory emf;
 
     @Bean(name = "validationStep")
