@@ -70,7 +70,7 @@ public class DailySettlementJob {
                 .next(transferSettlementStep(null)) // 정산 이체
                 .next(retryTransferSettlementStep(null)) // 정산 이체 실패시 재이체
                 .next(messageStep.sendMessageStep(null)) // 정산 이체 결과 메시지 전송
-                .next(transferValidationStep.validationStep()) // 정산 이체 결과 검증
+//                .next(transferValidationStep.validationStep()) // 정산 이체 결과 검증
                 .build();
     }
 

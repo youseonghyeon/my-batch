@@ -27,7 +27,7 @@ public class TransferValidationStep {
     private final PlatformTransactionManager ptm;
     private final EntityManagerFactory emf;
 
-    @Bean(name = "validationStep")
+//    @Bean(name = "validationStep")
     public Step validationStep() {
         log.info("==================== 6단계 전송 결과 검증 ====================");
         return new StepBuilder("validationStep", jobRepository)
