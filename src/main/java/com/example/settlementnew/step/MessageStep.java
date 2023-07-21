@@ -62,7 +62,6 @@ public class MessageStep {
     @Bean
     public ItemWriter<TransferHistory> sendMail() {
         return chunk -> {
-            log.info("chunk={}", chunk);
             for (TransferHistory history : chunk) {
                 DailySettlement dailySettlement = history.getDailySettlement();
 
