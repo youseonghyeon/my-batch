@@ -9,4 +9,6 @@ import java.util.List;
 public interface SettlementRepository extends JpaRepository<Settlement, Long> {
 
 
+
+
 }

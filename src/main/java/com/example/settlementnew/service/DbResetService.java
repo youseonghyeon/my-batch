@@ -30,9 +30,6 @@ public class DbResetService {
         dailySettlementRepository.deleteAll();
         settlementRepository.deleteAll();
 
-        log.info("dailySettlementRepository.count()={}", dailySettlementRepository.count());
-        log.info("transferHistoryRepository.count()={}", transferHistoryRepository.count());
-
     }
 
 

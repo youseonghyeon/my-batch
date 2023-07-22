@@ -6,6 +6,7 @@ import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
+@ToString
 public class Settlement {
 
     @Id
@@ -29,6 +31,13 @@ public class Settlement {
         this.username = username;
         this.price = price;
         this.createdAt = LocalDateTime.now();
+    }
+
+    public Settlement(Long id, String username, int price, LocalDateTime createdAt) {
+        this.id = id;
+        this.username = username;
+        this.price = price;
+        this.createdAt = createdAt;
     }
 
     public Settlement(Long id, String username, int price) {
