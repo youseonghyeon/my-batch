@@ -1,5 +1,6 @@
 package com.example.settlementnew.step;
 
+import com.example.settlementnew.aop.SendStartMessage;
 import com.example.settlementnew.service.SettlementService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,7 @@ public class MockDataInsertStep {
 
     @Bean(name = "insertMockSettlementStep")
     @JobScope
+    @SendStartMessage(title = "Mock 데이터 삽입", detail = "Mock 데이터 삽입을 시작합니다.")
     public Step insertMockSettlementStep(@Value("#{jobParameters[mockSize]}") Integer mockSize) {
         return new StepBuilder("insertMockSettlementStep", jobRepository)
                 .tasklet((contribution, chunkContext) -> {

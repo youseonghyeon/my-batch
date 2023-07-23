@@ -1,5 +1,6 @@
 package com.example.settlementnew.job;
 
+import com.example.settlementnew.aop.SendStartMessage;
 import com.example.settlementnew.entity.DailySettlement;
 import com.example.settlementnew.entity.TransferHistory;
 import com.example.settlementnew.processor.RetryTransferProcessor;
@@ -66,9 +67,13 @@ public class DailySettlementJob {
     public Job dailyJob() {
         return new JobBuilder("dailyJob", jobRepository)
                 .start(mockDataInsertStep.insertMockSettlementStep(null)) // mock 데이터 삽입
+                .next(delayStep())
                 .next(dailySettlementStep(null)) // 일일 정산
+                .next(delayStep())
                 .next(transferSettlementStep(null)) // 정산 이체
+                .next(delayStep())
                 .next(retryTransferSettlementStep(null)) // 정산 이체 실패시 재이체
+                .next(delayStep())
                 .next(messageStep.sendMessageStep(null)) // 정산 이체 결과 메시지 전송
 //                .next(transferValidationStep.validationStep()) // 정산 이체 결과 검증
                 .build();
@@ -77,6 +82,7 @@ public class DailySettlementJob {
 
     @Bean(name = "dailySettlementStep")
     @JobScope
+    @SendStartMessage(title = "일일 정산", detail = "일일 정산을 시작합니다.")
     public Step dailySettlementStep(@Value("#{jobParameters[targetDate]}") String targetDate) {
         return new StepBuilder("dailySettlementStep", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
@@ -91,6 +97,7 @@ public class DailySettlementJob {
 
     @Bean(name = "transferSettlementStep")
     @JobScope
+    @SendStartMessage(title = "정산 이체", detail = "정산 이체를 시작합니다.")
     public Step transferSettlementStep(@Value("#{jobParameters[chunkSize]}") Integer chunkSize) {
         log.info("==================== 3단계 송금 시작 ====================");
         return new StepBuilder("transferSettlementStep", jobRepository)
@@ -122,6 +129,7 @@ public class DailySettlementJob {
 
     @Bean(name = "retryTransferSettlementStep")
     @JobScope
+    @SendStartMessage(title = "재송금", detail = "실패한 정산 이체를 재송금합니다.")
     public Step retryTransferSettlementStep(@Value("#{jobParameters[chunkSize]}") Integer chunkSize) {
         log.info("==================== 4단계 실패한 결과 재송금 시작 ====================");
         return new StepBuilder("retryTransferSettlementStep", jobRepository)
@@ -148,5 +156,14 @@ public class DailySettlementJob {
         JpaItemWriter<TransferHistory> writer = new JpaItemWriter<>();
         writer.setEntityManagerFactory(emf);
         return writer;
+    }
+
+    @Bean
+    public Step delayStep() {
+        return new StepBuilder("delayStep", jobRepository)
+                .tasklet((contribution, chunkContext) -> {
+                    Thread.sleep(3000);
+                    return RepeatStatus.FINISHED;
+                }, ptm).build();
     }
 }

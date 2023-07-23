@@ -1,5 +1,6 @@
 package com.example.settlementnew.step;
 
+import com.example.settlementnew.aop.SendStartMessage;
 import com.example.settlementnew.api.dto.DefaultMessageMetadata;
 import com.example.settlementnew.entity.DailySettlement;
 import com.example.settlementnew.entity.TransferHistory;
@@ -39,6 +40,7 @@ public class MessageStep {
 
     @Bean("sendMessageStep")
     @JobScope
+    @SendStartMessage(title = "메일 전송", detail = "메일 전송을 시작합니다.")
     public Step sendMessageStep(@Value("#{jobParameters[chunkSize]}") Integer chunkSize) {
         log.info("==================== 5단계 결과 메일 전송 ====================");
         return new StepBuilder("sendMessageStep", jobRepository)

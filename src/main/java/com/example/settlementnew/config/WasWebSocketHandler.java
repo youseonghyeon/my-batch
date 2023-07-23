@@ -1,5 +1,7 @@
 package com.example.settlementnew.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -13,9 +15,12 @@ import java.util.Set;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class WasWebSocketHandler extends TextWebSocketHandler {
 
     private final Set<WebSocketSession> socketStore = new HashSet<>();
+
+    private final ObjectMapper objectMapper;
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
@@ -29,13 +34,12 @@ public class WasWebSocketHandler extends TextWebSocketHandler {
         socketStore.remove(session);
     }
 
-    public void sendMessage(String message) {
+    public void sendMessage(Object json) {
         socketStore.forEach(session -> {
             try {
-                log.info("session={}, message={}", session, message);
-                session.sendMessage(new TextMessage(message));
+                session.sendMessage(new TextMessage(objectMapper.writeValueAsString(json)));
             } catch (Exception e) {
-                log.error("Failed to send message: {}", message, e);
+                log.error("Failed to send message to session: {}", session.getId(), e);
             }
         });
     }

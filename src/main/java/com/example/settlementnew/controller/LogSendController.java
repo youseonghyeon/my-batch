@@ -18,6 +18,9 @@ public class LogSendController {
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = br.readLine()) != null) {
+                if (line.length() > 500) {
+                    line = line.substring(0, 500);
+                }
                 contentBuilder.append(line).append("\n");
             }
         } catch (IOException e) {
