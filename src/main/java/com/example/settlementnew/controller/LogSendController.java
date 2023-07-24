@@ -4,28 +4,41 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.*;
+import java.util.LinkedList;
+import java.util.Queue;
 
 @RestController
 public class LogSendController {
 
     @GetMapping("/logging")
     public String readLogfile() throws Exception {
-        return readFileToString("log/test.log");
+        return readFileToString("logs/application.log");
     }
 
     private static String readFileToString(String filePath) {
         StringBuilder contentBuilder = new StringBuilder();
+        Queue<String> Q = new LinkedList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = br.readLine()) != null) {
                 if (line.length() > 500) {
+                    // 500자 이상은 500자로 잘라서 보냄
                     line = line.substring(0, 500);
                 }
-                contentBuilder.append(line).append("\n");
+                Q.add(line);
+                // 최대 50줄만 보냄
+                if (Q.size()>150) {
+                    Q.poll();
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        for (String s : Q) {
+            contentBuilder.append(s).append("\n");
+        }
+
         return contentBuilder.toString();
     }
 }

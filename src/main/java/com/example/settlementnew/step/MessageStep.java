@@ -1,7 +1,7 @@
 package com.example.settlementnew.step;
 
 import com.example.settlementnew.aop.SendStartMessage;
-import com.example.settlementnew.api.dto.DefaultMessageMetadata;
+import com.example.settlementnew.dto.DefaultMessageMetadata;
 import com.example.settlementnew.entity.DailySettlement;
 import com.example.settlementnew.entity.TransferHistory;
 import com.example.settlementnew.entity.TransferStatus;

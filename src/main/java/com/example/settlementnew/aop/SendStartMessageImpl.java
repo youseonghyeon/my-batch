@@ -1,7 +1,8 @@
 package com.example.settlementnew.aop;
 
+import com.example.settlementnew.dto.socket_message.SocketMessage;
 import com.example.settlementnew.config.WasWebSocketHandler;
-import lombok.Data;
+import com.example.settlementnew.dto.socket_message.StatusMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -26,22 +27,17 @@ public class SendStartMessageImpl {
         String subject = sendStartMessage.title();
         String detail = sendStartMessage.detail();
 
-        BatchStatusMessage batchStatusMessage = new BatchStatusMessage(subject, detail);
+        SocketMessage socketMessage = new StatusMessage(subject, detail);
 
-        wasWebSocketHandler.sendMessage(batchStatusMessage);
-        return pjp.proceed();
-    }
-
-    @Data
-    private static class BatchStatusMessage {
-        private String type = "BATCH_STATUS";
-        private String subject;
-        private String detail;
-
-        public BatchStatusMessage(String subject, String detail) {
-            this.subject = subject;
-            this.detail = detail;
+        wasWebSocketHandler.sendMessage(socketMessage);
+        try {
+            return pjp.proceed();
+        } catch (Exception e) {
+            SocketMessage errorMessage = new StatusMessage(subject, "중간에 ERROR가 발생했습니다.");
+            wasWebSocketHandler.sendMessage(errorMessage);
+            throw e;
         }
     }
+
 
 }

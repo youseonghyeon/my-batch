@@ -9,8 +9,8 @@ import java.time.LocalDateTime;
 @Component
 public class BankApi {
 
-    private final double ERROR_RATE = 0.05;
-    private final double CRITICAL_ERROR_RATE = 0.01;
+    private final double ERROR_RATE = 0.001;
+    private final double CRITICAL_ERROR_RATE = 0.0002;
 
     public History transfer(String fromUsername, String toUsername, int price) throws Exception {
         double random = Math.random();

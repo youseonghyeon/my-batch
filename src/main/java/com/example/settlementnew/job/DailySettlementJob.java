@@ -162,7 +162,7 @@ public class DailySettlementJob {
     public Step delayStep() {
         return new StepBuilder("delayStep", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
-                    Thread.sleep(3000);
+                    Thread.sleep(5000);
                     return RepeatStatus.FINISHED;
                 }, ptm).build();
     }

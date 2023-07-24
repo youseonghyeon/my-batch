@@ -1,5 +1,8 @@
 package com.example.settlementnew.service;
 
+import com.example.settlementnew.dto.socket_message.SocketMessage;
+import com.example.settlementnew.config.WasWebSocketHandler;
+import com.example.settlementnew.dto.socket_message.StatusMessage;
 import com.example.settlementnew.entity.Settlement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,25 +22,33 @@ import java.util.List;
 public class SettlementService {
 
     private final JdbcTemplate jdbcTemplate;
+    private final WasWebSocketHandler wasWebSocketHandler;
 
     @Transactional
     public void insertMockData(int size) {
         log.info("데이터 {}개 삽입 [jdbcBatchInsert]", size);
         List<Settlement> settlements = new ArrayList<>();
-        for (int i = 0; i < size; i++) {
-            settlements.add(new Settlement((long) i, "user" + i % 1000, i * 5438 % 10000));
+        for (int i = 1; i < size + 1; i++) {
+            settlements.add(new Settlement("user" + i % 10000, i * 5438 % 10000));
+            if (i % 10000 == 0) {
+                insertSettlements(settlements);
+                settlements.clear();
+                SocketMessage socketMessage = new StatusMessage("Mock 데이터 삽입", i + "개 삽입 완료.");
+                wasWebSocketHandler.sendMessage(socketMessage);
+            }
         }
-        insertSettlements(settlements);
+        if (!settlements.isEmpty()) {
+            insertSettlements(settlements);
+        }
     }
 
     @Transactional
     public int insertSettlements(List<Settlement> settlements) {
-        String sql = "insert into settlement (id, username, price, created_at) values (?, ?, ?, ?)";
+        String sql = "insert into settlement (username, price, created_at) values (?, ?, ?)";
         jdbcTemplate.batchUpdate(sql, settlements, 5000, (ps, arg) -> {
-            ps.setLong(1, arg.getId());
-            ps.setString(2, arg.getUsername());
-            ps.setInt(3, arg.getPrice());
-            ps.setTimestamp(4, Timestamp.valueOf(arg.getCreatedAt()));
+            ps.setString(1, arg.getUsername());
+            ps.setInt(2, arg.getPrice());
+            ps.setTimestamp(3, Timestamp.valueOf(arg.getCreatedAt()));
         });
         return settlements.size();
     }
@@ -45,8 +56,8 @@ public class SettlementService {
     public void jdbcDailySettlement(LocalDate targetDate) {
         LocalDateTime start = targetDate.atStartOfDay();
         LocalDateTime end = targetDate.plusDays(1).atStartOfDay();
-        String sql = "insert into daily_settlement (id, username, total_price, created_at, target_date) " +
-                "select sum(id), username, sum(price), CURRENT_TIMESTAMP(), ?  from settlement where created_at between ? and ? group by username";
+        String sql = "insert into daily_settlement (username, total_price, created_at, target_date) " +
+                "select username, sum(price), CURRENT_TIMESTAMP(), ?  from settlement where created_at between ? and ? group by username";
         jdbcTemplate.update(sql, targetDate, start, end);
     }
 }

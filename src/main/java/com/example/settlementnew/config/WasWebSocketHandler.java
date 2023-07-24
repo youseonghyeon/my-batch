@@ -1,5 +1,6 @@
 package com.example.settlementnew.config;
 
+import com.example.settlementnew.dto.socket_message.SocketMessage;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,13 +35,15 @@ public class WasWebSocketHandler extends TextWebSocketHandler {
         socketStore.remove(session);
     }
 
-    public void sendMessage(Object json) {
+    public void sendMessage(SocketMessage socketMessage) {
         socketStore.forEach(session -> {
             try {
-                session.sendMessage(new TextMessage(objectMapper.writeValueAsString(json)));
+                session.sendMessage(new TextMessage(objectMapper.writeValueAsString(socketMessage)));
             } catch (Exception e) {
                 log.error("Failed to send message to session: {}", session.getId(), e);
             }
         });
     }
+
+
 }
