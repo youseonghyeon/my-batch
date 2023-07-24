@@ -1,4 +1,4 @@
-package com.example.settlementnew.dto;
+package com.example.settlementnew.dto.mail;
 
 import java.io.File;
 import java.util.List;

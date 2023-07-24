@@ -68,12 +68,16 @@ public class DailySettlementJob {
         return new JobBuilder("dailyJob", jobRepository)
                 .start(mockDataInsertStep.insertMockSettlementStep(null)) // mock 데이터 삽입
                 .next(delayStep())
+
                 .next(dailySettlementStep(null)) // 일일 정산
                 .next(delayStep())
+
                 .next(transferSettlementStep(null)) // 정산 이체
                 .next(delayStep())
+
                 .next(retryTransferSettlementStep(null)) // 정산 이체 실패시 재이체
                 .next(delayStep())
+
                 .next(messageStep.sendMessageStep(null)) // 정산 이체 결과 메시지 전송
 //                .next(transferValidationStep.validationStep()) // 정산 이체 결과 검증
                 .build();

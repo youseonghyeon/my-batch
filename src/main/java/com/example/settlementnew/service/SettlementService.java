@@ -1,7 +1,7 @@
 package com.example.settlementnew.service;
 
 import com.example.settlementnew.dto.socket_message.SocketMessage;
-import com.example.settlementnew.config.WasWebSocketHandler;
+import com.example.settlementnew.config.socket.WasWebSocketHandler;
 import com.example.settlementnew.dto.socket_message.StatusMessage;
 import com.example.settlementnew.entity.Settlement;
 import lombok.RequiredArgsConstructor;

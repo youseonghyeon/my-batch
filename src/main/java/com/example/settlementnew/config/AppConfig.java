@@ -1,5 +1,7 @@
 package com.example.settlementnew.config;
 
+import com.example.settlementnew.api.BankApi;
+import com.example.settlementnew.api.DefaultBankApi;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,5 +35,10 @@ public class AppConfig {
                 gen.writeString(formattedDateTime);
             }
         };
+    }
+
+    @Bean
+    public BankApi bankApi() {
+        return new DefaultBankApi();
     }
 }

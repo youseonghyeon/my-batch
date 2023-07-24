@@ -1,4 +1,4 @@
-package com.example.settlementnew.config;
+package com.example.settlementnew.config.socket;
 
 import com.example.settlementnew.dto.socket_message.SocketMessage;
 import com.fasterxml.jackson.databind.ObjectMapper;

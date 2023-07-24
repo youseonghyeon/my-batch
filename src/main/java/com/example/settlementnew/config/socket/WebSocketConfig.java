@@ -1,4 +1,4 @@
-package com.example.settlementnew.config;
+package com.example.settlementnew.config.socket;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;

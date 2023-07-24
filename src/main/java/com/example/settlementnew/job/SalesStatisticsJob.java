@@ -12,11 +12,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
+/**
+ * 기능 미지원
+ */
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class SalesStatisticsJob {
-
 
     private final JobRepository jobRepository;
     private final PlatformTransactionManager ptm;

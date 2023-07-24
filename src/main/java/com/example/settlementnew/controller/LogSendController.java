@@ -10,12 +10,14 @@ import java.util.Queue;
 @RestController
 public class LogSendController {
 
+    private static final String LOG_FILE = "logs/application.log";
+
     @GetMapping("/logging")
-    public String readLogfile() throws Exception {
-        return readFileToString("logs/application.log");
+    public String readLogfile() {
+        return readLog(LOG_FILE);
     }
 
-    private static String readFileToString(String filePath) {
+    private String readLog(String filePath) {
         StringBuilder contentBuilder = new StringBuilder();
         Queue<String> Q = new LinkedList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
@@ -27,7 +29,7 @@ public class LogSendController {
                 }
                 Q.add(line);
                 // 최대 50줄만 보냄
-                if (Q.size()>150) {
+                if (Q.size() > 150) {
                     Q.poll();
                 }
             }
@@ -36,7 +38,8 @@ public class LogSendController {
         }
 
         for (String s : Q) {
-            contentBuilder.append(s).append("\n");
+            contentBuilder.append(s)
+                    .append("\n");
         }
 
         return contentBuilder.toString();

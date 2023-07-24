@@ -15,7 +15,7 @@ public class TransferProcessor implements ItemProcessor<DailySettlement, Transfe
     private final TransferService transferService;
 
     @Override
-    public TransferHistory process(DailySettlement dailySettlement) throws Exception {
+    public TransferHistory process(DailySettlement dailySettlement) {
         History history = transferService.transfer(dailySettlement.getUsername(), dailySettlement.getTotalPrice());
         TransferStatus transferStatus = history.isStatus() ? TransferStatus.COMPLETED : TransferStatus.FAILED;
         return new TransferHistory(transferStatus, history.getFrom(), history.getTo(), history.getAmount(), dailySettlement);

@@ -1,7 +1,7 @@
 package com.example.settlementnew.aop;
 
 import com.example.settlementnew.dto.socket_message.SocketMessage;
-import com.example.settlementnew.config.WasWebSocketHandler;
+import com.example.settlementnew.config.socket.WasWebSocketHandler;
 import com.example.settlementnew.dto.socket_message.StatusMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,6 +1,6 @@
 package com.example.settlementnew.api;
 
-import com.example.settlementnew.dto.MessageMetadata;
+import com.example.settlementnew.dto.mail.MessageMetadata;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
