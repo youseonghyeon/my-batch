@@ -1,6 +1,29 @@
 chunk-size: 100
+server:
+  port: 8002
 
+---
 spring:
+  config:
+    activate:
+      on-profile: aws
+  rabbitmq:
+    host: amqps://b-12f334b9-d753-448b-bd98-4b54d466ca91.mq.ap-northeast-2.amazonaws.com
+    port: 5671
+    username: epfzja
+    password: q1w2e3r4t5!@
+  batch:
+    job:
+      enabled: false
+os:
+  memory-size: 1
+
+# prod 프로파일 설정
+---
+spring:
+  config:
+    activate:
+      on-profile: default
   rabbitmq:
     host: 127.0.0.1
     port: 5672
@@ -9,8 +32,7 @@ spring:
   batch:
     job:
       enabled: false
-server:
-  port: 8002
 
 os:
   memory-size: 16
+

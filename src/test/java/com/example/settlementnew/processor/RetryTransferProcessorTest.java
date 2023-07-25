@@ -51,7 +51,7 @@ class RetryTransferProcessorTest {
 
     }
 
-    private TransferHistory createFailCase(TransferStatus status, String fromUsername, String toUsername, int amount) {
+    private TransferHistory createFailCase(TransferStatus status, String fromUsername, String toUsername, long amount) {
         return new TransferHistory(status, fromUsername, toUsername, amount, null);
     }
 

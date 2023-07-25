@@ -59,7 +59,7 @@ class SettlementServiceTest {
 
     }
 
-    private int getTotalPrice(List<DailySettlement> allByTargetDate, String user) {
+    private long getTotalPrice(List<DailySettlement> allByTargetDate, String user) {
         List<DailySettlement> collect = allByTargetDate.stream().filter(ds -> ds.getUsername().equals(user)).toList();
         return collect.get(0).getTotalPrice();
     }
