@@ -3,6 +3,7 @@ server:
   port: 8002
 
 ---
+
 spring:
   config:
     activate:
@@ -18,8 +19,9 @@ spring:
 os:
   memory-size: 1
 
-# prod 프로파일 설정
+
 ---
+
 spring:
   config:
     activate:
