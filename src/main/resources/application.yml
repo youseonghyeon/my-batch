@@ -9,7 +9,7 @@ spring:
     activate:
       on-profile: aws
   rabbitmq:
-    host: amqps://b-12f334b9-d753-448b-bd98-4b54d466ca91.mq.ap-northeast-2.amazonaws.com
+    host: b-12f334b9-d753-448b-bd98-4b54d466ca91.mq.ap-northeast-2.amazonaws.com
     port: 5671
     username: epfzja
     password: q1w2e3r4t5!@
