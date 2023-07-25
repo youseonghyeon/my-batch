@@ -13,6 +13,8 @@ spring:
     port: 5671
     username: epfzja
     password: q1w2e3r4t5!@
+    ssl:
+      enabled: true
   batch:
     job:
       enabled: false
