@@ -86,7 +86,8 @@ public class DailySettlementJob {
 
     @Bean(name = "dailySettlementStep")
     @JobScope
-    @SendStartMessage(title = "일일 정산", detail = "일일 정산을 시작합니다.")
+    @SendStartMessage(title = "일일 정산", detail = "일일 정산을 시작합니다.\n" +
+            "rabbitMQ -> Spring Batch")
     public Step dailySettlementStep(@Value("#{jobParameters[targetDate]}") String targetDate) {
         return new StepBuilder("dailySettlementStep", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
@@ -101,7 +102,8 @@ public class DailySettlementJob {
 
     @Bean(name = "transferSettlementStep")
     @JobScope
-    @SendStartMessage(title = "정산 이체", detail = "정산 이체를 시작합니다.")
+    @SendStartMessage(title = "정산 이체", detail = "정산 이체를 시작합니다." +
+            "오류율 : 0.1%")
     public Step transferSettlementStep(@Value("#{jobParameters[chunkSize]}") Integer chunkSize) {
         log.info("==================== 3단계 송금 시작 ====================");
         return new StepBuilder("transferSettlementStep", jobRepository)
@@ -166,7 +168,7 @@ public class DailySettlementJob {
     public Step delayStep() {
         return new StepBuilder("delayStep", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
-                    Thread.sleep(5000);
+                    Thread.sleep(1000);
                     return RepeatStatus.FINISHED;
                 }, ptm).build();
     }

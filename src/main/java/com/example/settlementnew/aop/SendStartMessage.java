@@ -11,4 +11,6 @@ public @interface SendStartMessage {
 
     String title();
     String detail();
+
+    String img() default "";
 }

@@ -1,5 +1,6 @@
-package com.example.settlementnew.config.socket;
+package com.example.settlementnew.application_runner;
 
+import com.example.settlementnew.config.socket.WasWebSocketHandler;
 import com.example.settlementnew.dto.socket_message.LogMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

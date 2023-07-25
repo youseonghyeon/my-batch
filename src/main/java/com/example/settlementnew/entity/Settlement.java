@@ -24,17 +24,17 @@ public class Settlement {
 
     private String username;
 
-    private int price;
+    private long price;
 
     private LocalDateTime createdAt;
 
-    public Settlement(String username, int price) {
+    public Settlement(String username, long price) {
         this.username = username;
         this.price = price;
         this.createdAt = LocalDateTime.now();
     }
 
-    public Settlement(Long id, String username, int price, LocalDateTime createdAt) {
+    public Settlement(Long id, String username, long price, LocalDateTime createdAt) {
         this.id = id;
         this.username = username;
         this.price = price;

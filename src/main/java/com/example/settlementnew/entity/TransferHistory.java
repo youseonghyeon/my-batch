@@ -26,7 +26,7 @@ public class TransferHistory {
 
     private String toUsername;
 
-    private int amount;
+    private long amount;
 
     private LocalDateTime createdAt;
 
@@ -34,7 +34,7 @@ public class TransferHistory {
     @JoinColumn(name = "daily_settlement_id")
     private DailySettlement dailySettlement;
 
-    public TransferHistory(TransferStatus status, String fromUsername, String toUsername, int amount) {
+    public TransferHistory(TransferStatus status, String fromUsername, String toUsername, long amount) {
         this.status = status;
         this.fromUsername = fromUsername;
         this.toUsername = toUsername;
@@ -42,7 +42,7 @@ public class TransferHistory {
         this.createdAt = LocalDateTime.now();
     }
 
-    public TransferHistory(TransferStatus status, String fromUsername, String toUsername, int amount, DailySettlement dailySettlement) {
+    public TransferHistory(TransferStatus status, String fromUsername, String toUsername, long amount, DailySettlement dailySettlement) {
         this.status = status;
         this.fromUsername = fromUsername;
         this.toUsername = toUsername;

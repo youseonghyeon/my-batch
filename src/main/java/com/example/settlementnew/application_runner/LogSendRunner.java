@@ -1,6 +1,5 @@
 package com.example.settlementnew.application_runner;
 
-import com.example.settlementnew.config.socket.LogSenderThread;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;

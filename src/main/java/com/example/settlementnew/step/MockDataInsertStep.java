@@ -25,7 +25,8 @@ public class MockDataInsertStep {
 
     @Bean(name = "insertMockSettlementStep")
     @JobScope
-    @SendStartMessage(title = "Mock 데이터 삽입", detail = "Mock 데이터 삽입을 시작합니다.")
+    @SendStartMessage(title = "Mock 데이터 삽입", detail = "Mock 데이터 삽입을 시작합니다.\n" +
+            "jdbcBatch Insert를 사용하여 데이터를 삽입합니다.")
     public Step insertMockSettlementStep(@Value("#{jobParameters[mockSize]}") Integer mockSize) {
         return new StepBuilder("insertMockSettlementStep", jobRepository)
                 .tasklet((contribution, chunkContext) -> {

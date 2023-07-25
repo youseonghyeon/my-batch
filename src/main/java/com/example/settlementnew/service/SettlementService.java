@@ -11,10 +11,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 @Slf4j
 @Service
@@ -23,17 +25,21 @@ public class SettlementService {
 
     private final JdbcTemplate jdbcTemplate;
     private final WasWebSocketHandler wasWebSocketHandler;
+    private static final Random RANDOM = new Random();
+    private NumberFormat numberFormat = NumberFormat.getInstance();
+
 
     @Transactional
     public void insertMockData(int size) {
         log.info("데이터 {}개 삽입 [jdbcBatchInsert]", size);
         List<Settlement> settlements = new ArrayList<>();
         for (int i = 1; i < size + 1; i++) {
-            settlements.add(new Settlement("user" + i % 10000, i * 5438 % 10000));
+
+            settlements.add(new Settlement("user" + i % 10000, 5000 + RANDOM.nextInt(151) * 100));
             if (i % 10000 == 0) {
                 insertSettlements(settlements);
                 settlements.clear();
-                SocketMessage socketMessage = new StatusMessage("Mock 데이터 삽입", i + "개 삽입 완료.");
+                SocketMessage socketMessage = new StatusMessage("Mock 데이터 삽입", numberFormat.format(i) + " 개 Insert 완료.");
                 wasWebSocketHandler.sendMessage(socketMessage);
             }
         }
@@ -47,7 +53,7 @@ public class SettlementService {
         String sql = "insert into settlement (username, price, created_at) values (?, ?, ?)";
         jdbcTemplate.batchUpdate(sql, settlements, 5000, (ps, arg) -> {
             ps.setString(1, arg.getUsername());
-            ps.setInt(2, arg.getPrice());
+            ps.setLong(2, arg.getPrice());
             ps.setTimestamp(3, Timestamp.valueOf(arg.getCreatedAt()));
         });
         return settlements.size();

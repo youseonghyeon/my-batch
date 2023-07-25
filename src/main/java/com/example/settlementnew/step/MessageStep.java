@@ -40,7 +40,8 @@ public class MessageStep {
 
     @Bean("sendMessageStep")
     @JobScope
-    @SendStartMessage(title = "메일 전송", detail = "메일 전송을 시작합니다.")
+    @SendStartMessage(title = "메일 전송", detail = "메일 전송은 RabbitMQ를 통해 위임됩니다",
+            img = "send_mail.png")
     public Step sendMessageStep(@Value("#{jobParameters[chunkSize]}") Integer chunkSize) {
         log.info("==================== 5단계 결과 메일 전송 ====================");
         return new StepBuilder("sendMessageStep", jobRepository)

@@ -21,7 +21,7 @@ public class DailySettlement {
 
     private String username;
 
-    private int totalPrice;
+    private long totalPrice;
 
     private LocalDate targetDate;
 

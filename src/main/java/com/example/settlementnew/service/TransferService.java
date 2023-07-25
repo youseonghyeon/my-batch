@@ -14,7 +14,7 @@ public class TransferService {
     private final BankApi bankApi;
 
 
-    public History transfer(String to, int price) {
+    public History transfer(String to, long price) {
         try {
             return bankApi.transfer("myJob", to, price);
         } catch (Exception e) {

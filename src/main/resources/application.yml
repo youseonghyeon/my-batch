@@ -11,3 +11,6 @@ spring:
       enabled: false
 server:
   port: 8002
+
+os:
+  memory-size: 16

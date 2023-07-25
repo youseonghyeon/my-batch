@@ -26,8 +26,9 @@ public class SendStartMessageImpl {
         SendStartMessage sendStartMessage = methodSignature.getMethod().getAnnotation(SendStartMessage.class);
         String subject = sendStartMessage.title();
         String detail = sendStartMessage.detail();
+        String img = sendStartMessage.img();
 
-        SocketMessage socketMessage = new StatusMessage(subject, detail);
+        SocketMessage socketMessage = new StatusMessage(subject, detail, img);
 
         wasWebSocketHandler.sendMessage(socketMessage);
         try {
