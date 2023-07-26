@@ -1,5 +1,6 @@
 package com.example.settlementnew.controller;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -10,7 +11,8 @@ import java.util.Queue;
 @RestController
 public class LogSendController {
 
-    private static final String LOG_FILE = "logs/application.log";
+    @Value("${logging.file.path}")
+    private String LOG_FILE;
 
     @GetMapping("/logging")
     public String readLogfile() {
