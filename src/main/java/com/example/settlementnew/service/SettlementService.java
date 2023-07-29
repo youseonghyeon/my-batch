@@ -1,8 +1,6 @@
 package com.example.settlementnew.service;
 
-import com.example.settlementnew.dto.socket_message.SocketMessage;
-import com.example.settlementnew.config.socket.WasWebSocketHandler;
-import com.example.settlementnew.dto.socket_message.StatusMessage;
+import com.example.settlementnew.socket.SocketSender;
 import com.example.settlementnew.entity.Settlement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,9 +22,11 @@ import java.util.Random;
 public class SettlementService {
 
     private final JdbcTemplate jdbcTemplate;
-    private final WasWebSocketHandler wasWebSocketHandler;
+    private final SocketSender wasWebSocketHandler;
     private static final Random RANDOM = new Random();
     private NumberFormat numberFormat = NumberFormat.getInstance();
+
+    private final int BATCH_SIZE = 1000;
 
 
     @Transactional
@@ -36,11 +36,10 @@ public class SettlementService {
         for (int i = 1; i < size + 1; i++) {
 
             settlements.add(new Settlement("user" + i % 10000, 5000 + RANDOM.nextInt(151) * 100));
-            if (i % 10000 == 0) {
+            if (i % BATCH_SIZE == 0) {
                 insertSettlements(settlements);
                 settlements.clear();
-                SocketMessage socketMessage = new StatusMessage("Mock 데이터 삽입", numberFormat.format(i) + " 개 Insert 완료.");
-                wasWebSocketHandler.sendMessage(socketMessage);
+                wasWebSocketHandler.sendStatus("Mock 데이터 삽입", numberFormat.format(i) + " 개 Insert 완료.");
             }
         }
         if (!settlements.isEmpty()) {
@@ -51,7 +50,7 @@ public class SettlementService {
     @Transactional
     public int insertSettlements(List<Settlement> settlements) {
         String sql = "insert into settlement (username, price, created_at) values (?, ?, ?)";
-        jdbcTemplate.batchUpdate(sql, settlements, 5000, (ps, arg) -> {
+        jdbcTemplate.batchUpdate(sql, settlements, BATCH_SIZE, (ps, arg) -> {
             ps.setString(1, arg.getUsername());
             ps.setLong(2, arg.getPrice());
             ps.setTimestamp(3, Timestamp.valueOf(arg.getCreatedAt()));

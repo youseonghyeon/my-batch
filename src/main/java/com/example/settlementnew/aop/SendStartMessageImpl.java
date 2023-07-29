@@ -1,8 +1,6 @@
 package com.example.settlementnew.aop;
 
-import com.example.settlementnew.dto.socket_message.SocketMessage;
-import com.example.settlementnew.config.socket.WasWebSocketHandler;
-import com.example.settlementnew.dto.socket_message.StatusMessage;
+import com.example.settlementnew.socket.SocketSender;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -17,7 +15,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class SendStartMessageImpl {
 
-    private final WasWebSocketHandler wasWebSocketHandler;
+    private final SocketSender socketSender;
 
 
     @Around("@annotation(com.example.settlementnew.aop.SendStartMessage)")
@@ -28,14 +26,11 @@ public class SendStartMessageImpl {
         String detail = sendStartMessage.detail();
         String img = sendStartMessage.img();
 
-        SocketMessage socketMessage = new StatusMessage(subject, detail, img);
-
-        wasWebSocketHandler.sendMessage(socketMessage);
+        socketSender.sendStatus(subject, detail, img);
         try {
             return pjp.proceed();
         } catch (Exception e) {
-            SocketMessage errorMessage = new StatusMessage(subject, "중간에 ERROR가 발생했습니다.");
-            wasWebSocketHandler.sendMessage(errorMessage);
+            socketSender.sendStatus(subject, "중간에 ERROR가 발생했습니다.");
             throw e;
         }
     }

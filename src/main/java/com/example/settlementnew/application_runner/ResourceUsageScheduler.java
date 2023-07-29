@@ -1,7 +1,6 @@
 package com.example.settlementnew.application_runner;
 
-import com.example.settlementnew.config.socket.WasWebSocketHandler;
-import com.example.settlementnew.dto.socket_message.ResourceMessage;
+import com.example.settlementnew.socket.SocketSender;
 import com.sun.management.OperatingSystemMXBean;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,7 +15,7 @@ import java.lang.management.ManagementFactory;
 @RequiredArgsConstructor
 public class ResourceUsageScheduler {
 
-    private final WasWebSocketHandler wasWebSocketHandler;
+    private final SocketSender socketSender;
 
     @Value("${os.memory-size}")
     private long memorySize;
@@ -31,6 +30,6 @@ public class ResourceUsageScheduler {
         // 편의상 jvm mem 사용량을 전체 사용량으로 표현
         String memUse = String.format("%.2f", usedMemory) + "%";
         String cpuUse = String.format("%.2f", cpuLoad) + "%";
-        wasWebSocketHandler.sendMessage(new ResourceMessage(cpuUse, memUse));
+        socketSender.sendResourceMessage(cpuUse, memUse);
     }
 }

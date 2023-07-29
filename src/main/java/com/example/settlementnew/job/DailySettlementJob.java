@@ -6,9 +6,8 @@ import com.example.settlementnew.entity.TransferHistory;
 import com.example.settlementnew.processor.RetryTransferProcessor;
 import com.example.settlementnew.processor.TransferProcessor;
 import com.example.settlementnew.service.SettlementService;
+import com.example.settlementnew.socket.SocketSender;
 import com.example.settlementnew.step.MessageStep;
-import com.example.settlementnew.step.MockDataInsertStep;
-import com.example.settlementnew.step.TransferValidationStep;
 import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,15 +38,12 @@ public class DailySettlementJob {
     private final PlatformTransactionManager ptm;
     private final EntityManagerFactory emf;
 
-    private final MockDataInsertStep mockDataInsertStep;
 
     private final MessageStep messageStep;
     private final SettlementService settlementService;
-
     private final TransferProcessor transferProcessor;
     private final RetryTransferProcessor retryTransferProcessor;
-
-    private final TransferValidationStep transferValidationStep;
+    private final SocketSender socketSender;
 
     private static final String SELECT_FAILED_TRANSFER = "SELECT th FROM TransferHistory th WHERE th.status = 'FAILED'";
     private static final String SELECT_DAILY_SETTLEMENT = "SELECT ds FROM DailySettlement ds";
@@ -66,7 +62,7 @@ public class DailySettlementJob {
     @Bean(name = "dailyJob")
     public Job dailyJob() {
         return new JobBuilder("dailyJob", jobRepository)
-                .start(mockDataInsertStep.insertMockSettlementStep(null)) // mock 데이터 삽입
+                .start(insertMockSettlementStep(null)) // mock 데이터 삽입
                 .next(delayStep())
 
                 .next(dailySettlementStep(null)) // 일일 정산
@@ -79,19 +75,32 @@ public class DailySettlementJob {
                 .next(delayStep())
 
                 .next(messageStep.sendMessageStep(null)) // 정산 이체 결과 메시지 전송
-//                .next(transferValidationStep.validationStep()) // 정산 이체 결과 검증
+                .next(finishStep())
+
+                .build();
+    }
+
+    @Bean(name = "insertMockSettlementStep")
+    @JobScope
+    @SendStartMessage(title = "Step 1. Mock 데이터 삽입", detail = "Mock 데이터 삽입을 시작합니다.")
+    public Step insertMockSettlementStep(@Value("#{jobParameters[mockSize]}") Integer mockSize) {
+        return new StepBuilder("insertMockSettlementStep", jobRepository)
+                .tasklet((contribution, chunkContext) -> {
+                    log.info("==================== Step 1. Mock 데이터 삽입 시작 ====================");
+                    settlementService.insertMockData(mockSize);
+                    return RepeatStatus.FINISHED;
+                }, ptm)
                 .build();
     }
 
 
     @Bean(name = "dailySettlementStep")
     @JobScope
-    @SendStartMessage(title = "일일 정산", detail = "일일 정산을 시작합니다.\n" +
-            "rabbitMQ -> Spring Batch")
+    @SendStartMessage(title = "Step 2. 일일 정산", detail = "해당 날짜의 금액의 Total을 구합니다.", img = "mysql.png")
     public Step dailySettlementStep(@Value("#{jobParameters[targetDate]}") String targetDate) {
         return new StepBuilder("dailySettlementStep", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
-                    log.info("==================== 2단계 데이터 정산 시작 ====================");
+                    log.info("==================== Step 2. 데이터 정산 시작 ====================");
                     LocalDate target = LocalDate.parse(targetDate, DateTimeFormatter.ISO_DATE);
                     log.info("현재 날짜 : {}, 정산 날짜 : {}", LocalDate.now().format(DateTimeFormatter.ISO_DATE), targetDate);
                     settlementService.jdbcDailySettlement(target);
@@ -102,10 +111,9 @@ public class DailySettlementJob {
 
     @Bean(name = "transferSettlementStep")
     @JobScope
-    @SendStartMessage(title = "정산 이체", detail = "정산 이체를 시작합니다." +
-            "오류율 : 0.1%")
+    @SendStartMessage(title = "Step 3. 정산 이체", detail = "정산 이체를 시작합니다.(test API)", img = "bank.png")
     public Step transferSettlementStep(@Value("#{jobParameters[chunkSize]}") Integer chunkSize) {
-        log.info("==================== 3단계 송금 시작 ====================");
+        log.info("==================== Step 3. 송금 시작 ====================");
         return new StepBuilder("transferSettlementStep", jobRepository)
                 .<DailySettlement, TransferHistory>chunk(chunkSize, ptm)
                 .reader(dailySettlementReader(null))
@@ -135,14 +143,14 @@ public class DailySettlementJob {
 
     @Bean(name = "retryTransferSettlementStep")
     @JobScope
-    @SendStartMessage(title = "재송금", detail = "실패한 정산 이체를 재송금합니다.")
+    @SendStartMessage(title = "Step 4. 재송금", detail = "실패한 정산 이체를 재송금합니다.")
     public Step retryTransferSettlementStep(@Value("#{jobParameters[chunkSize]}") Integer chunkSize) {
-        log.info("==================== 4단계 실패한 결과 재송금 시작 ====================");
+        log.info("==================== Step 4. 실패한 결과 재송금 시작 ====================");
         return new StepBuilder("retryTransferSettlementStep", jobRepository)
                 .<TransferHistory, TransferHistory>chunk(chunkSize, ptm)
                 .reader(retrySettlementReader(null))
                 .processor(retryTransferProcessor)
-                .writer(retrySettlementWriter())
+                .writer(settlementWriter())
                 .build();
 
     }
@@ -157,12 +165,17 @@ public class DailySettlementJob {
         return reader;
     }
 
-    @Bean
-    public JpaItemWriter<TransferHistory> retrySettlementWriter() {
-        JpaItemWriter<TransferHistory> writer = new JpaItemWriter<>();
-        writer.setEntityManagerFactory(emf);
-        return writer;
+
+
+    public Step finishStep() {
+        return new StepBuilder("finishStep", jobRepository)
+                .tasklet((contribution, chunkContext) -> {
+                    log.info("==================== Step 7. 정산 배치 종료 ====================");
+                    socketSender.sendStatus("정산 배치가 종료되었습니다.", null, null);
+                    return RepeatStatus.FINISHED;
+                }, ptm).build();
     }
+
 
     @Bean
     public Step delayStep() {

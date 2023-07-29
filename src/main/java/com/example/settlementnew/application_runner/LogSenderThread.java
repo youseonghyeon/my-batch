@@ -1,7 +1,6 @@
 package com.example.settlementnew.application_runner;
 
-import com.example.settlementnew.config.socket.WasWebSocketHandler;
-import com.example.settlementnew.dto.socket_message.LogMessage;
+import com.example.settlementnew.socket.SocketSender;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +13,7 @@ import java.io.IOException;
 public class LogSenderThread extends Thread {
 
     private static final String LOG_FILE_PATH = "logs/application.log";
-    private final WasWebSocketHandler wasWebSocketHandler;
+    private final SocketSender socketSender;
 
     @Override
     public void run() {
@@ -22,7 +21,7 @@ public class LogSenderThread extends Thread {
             String line;
             while (true) {
                 if ((line = reader.readLine()) != null) {
-                    wasWebSocketHandler.sendMessage(new LogMessage(line));
+                    socketSender.sendLogMessage(line);
                 } else {
                     sleep(1000);
                 }

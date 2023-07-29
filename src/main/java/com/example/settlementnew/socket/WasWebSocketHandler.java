@@ -1,4 +1,4 @@
-package com.example.settlementnew.config.socket;
+package com.example.settlementnew.socket;
 
 import com.example.settlementnew.dto.socket_message.SocketMessage;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,7 +17,7 @@ import java.util.Set;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class WasWebSocketHandler extends TextWebSocketHandler {
+class WasWebSocketHandler extends TextWebSocketHandler {
 
     private final Set<WebSocketSession> socketStore = new HashSet<>();
 
@@ -35,7 +35,7 @@ public class WasWebSocketHandler extends TextWebSocketHandler {
         socketStore.remove(session);
     }
 
-    public void sendMessage(SocketMessage socketMessage) {
+    protected void sendMessage(SocketMessage socketMessage) {
         socketStore.forEach(session -> {
             try {
                 session.sendMessage(new TextMessage(objectMapper.writeValueAsString(socketMessage)));
@@ -43,6 +43,10 @@ public class WasWebSocketHandler extends TextWebSocketHandler {
                 log.error("Failed to send message to session: {}", session.getId(), e);
             }
         });
+    }
+
+    protected boolean sessionIsEmpty() {
+        return socketStore.isEmpty();
     }
 
 
