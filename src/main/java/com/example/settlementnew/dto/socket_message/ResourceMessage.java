@@ -1,7 +1,9 @@
 package com.example.settlementnew.dto.socket_message;
 
 import lombok.Data;
+import lombok.Getter;
 
+@Getter
 public class ResourceMessage extends SocketMessage {
 
     private String cpu;
@@ -13,16 +15,8 @@ public class ResourceMessage extends SocketMessage {
         this.memory = memory;
     }
 
-    public String getCpu() {
-        return cpu;
-    }
-
     public void setCpu(String cpu) {
         this.cpu = cpu;
-    }
-
-    public String getMemory() {
-        return memory;
     }
 
     public void setMemory(String memory) {

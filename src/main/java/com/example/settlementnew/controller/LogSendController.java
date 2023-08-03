@@ -16,34 +16,47 @@ public class LogSendController {
 
     @GetMapping("/logging")
     public String readLogfile() {
-        return readLog(LOG_FILE);
+        Queue<String> logLines = readLogLines(LOG_FILE);
+        return concatenateLogLines(logLines);
     }
 
-    private String readLog(String filePath) {
-        StringBuilder contentBuilder = new StringBuilder();
-        Queue<String> Q = new LinkedList<>();
+    private Queue<String> readLogLines(String filePath) {
+        Queue<String> logLines = new LinkedList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = br.readLine()) != null) {
-                if (line.length() > 500) {
-                    // 500자 이상은 500자로 잘라서 보냄
-                    line = line.substring(0, 500);
-                }
-                Q.add(line);
-                // 최대 50줄만 보냄
-                if (Q.size() > 150) {
-                    Q.poll();
+                line = truncateLineIfNecessary(line);
+                logLines.add(line);
+
+                // 최대 150줄만 보냄
+                if (logLines.size() > 150) {
+                    logLines.poll();
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        for (String s : Q) {
-            contentBuilder.append(s)
-                    .append("\n");
+        return logLines;
+    }
+
+    private String truncateLineIfNecessary(String line) {
+        if (line.length() > 500) {
+            // 500자 이상은 500자로 잘라서 보냄
+            return line.substring(0, 500);
+        } else {
+            return line;
+        }
+    }
+
+    private String concatenateLogLines(Queue<String> logLines) {
+        StringBuilder contentBuilder = new StringBuilder();
+
+        for (String logLine : logLines) {
+            contentBuilder.append(logLine).append("\n");
         }
 
         return contentBuilder.toString();
     }
 }
+

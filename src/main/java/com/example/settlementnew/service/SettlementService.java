@@ -24,7 +24,7 @@ public class SettlementService {
     private final JdbcTemplate jdbcTemplate;
     private final SocketSender wasWebSocketHandler;
     private static final Random RANDOM = new Random();
-    private NumberFormat numberFormat = NumberFormat.getInstance();
+    private final NumberFormat numberFormat = NumberFormat.getInstance();
 
     private final int BATCH_SIZE = 1000;
 

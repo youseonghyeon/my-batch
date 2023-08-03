@@ -27,7 +27,7 @@ public class ResourceUsageScheduler {
         Runtime runtime = Runtime.getRuntime();
         double usedMemory = (double) (runtime.totalMemory() - runtime.freeMemory()) / 1024 / 1024 / 1024 * 100 / memorySize;
 
-        // 편의상 jvm mem 사용량을 전체 사용량으로 표현
+        // 편의상 jvm mem 사용 량을 전체 사용량으로 표현
         String memUse = String.format("%.2f", usedMemory) + "%";
         String cpuUse = String.format("%.2f", cpuLoad) + "%";
         socketSender.sendResourceMessage(cpuUse, memUse);

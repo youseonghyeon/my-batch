@@ -5,8 +5,8 @@ import java.util.List;
 
 public class DefaultMessageMetadata extends MessageMetadata {
 
-    private String from;
-    private List<String> to;
+    private final String from;
+    private final List<String> to;
     private List<String> cc;
     private String subject;
     private String body;

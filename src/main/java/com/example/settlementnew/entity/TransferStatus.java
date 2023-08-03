@@ -1,5 +1,8 @@
 package com.example.settlementnew.entity;
 
+import lombok.Getter;
+
+@Getter
 public enum TransferStatus {
     PENDING("Pending"),
     COMPLETED("Completed"),
@@ -12,7 +15,4 @@ public enum TransferStatus {
         this.status = status;
     }
 
-    public String getStatus() {
-        return status;
-    }
 }
